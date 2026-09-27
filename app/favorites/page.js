@@ -8,12 +8,10 @@ export default function FavoritesPage() {
 
   return (
     <section className="relative">
-      {/* Background grid identik dengan halaman Contact */}
       <div className="bg-grid bg-radial-fade absolute inset-0 -z-10" />
 
       {/* Container utama dengan max-w-6xl, px-6, dan py-20 agar posisi konsisten */}
       <div className="mx-auto max-w-6xl px-6 py-20">
-        {/* Header section persis seperti struktur tulisan di Contact */}
         <div className="max-w-2xl">
           <p className="text-sm font-semibold text-primary">Favorite</p>
 
