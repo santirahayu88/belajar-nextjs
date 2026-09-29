@@ -1,36 +1,81 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const FavoriteContext = createContext();
+const FavoriteContext = createContext(undefined);
 
 export function FavoriteProvider({ children }) {
   const [favorites, setFavorites] = useState([]);
 
-  // Fungsi toggle untuk menambah atau menghapus favorit
-  const toggleFavorite = (user) => {
-    setFavorites((prevFavorites) => {
-      const isExist = prevFavorites.some((item) => item.id === user.id);
-      if (isExist) {
-        return prevFavorites.filter((item) => item.id !== user.id);
-      } else {
-        return [...prevFavorites, user];
-      }
-    });
-  };
+  useEffect(() => {
+    fetch("/api/favorites")
+      .then((res) => res.json())
+      .then(setFavorites);
+  }, []);
 
-  // Fungsi pengecekan status favorit
-  const isFavorite = (userId) => {
-    return favorites.some((item) => item.id === userId);
+  async function addFavorite(user) {
+    const res = await fetch("/api/favorites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    });
+
+    if (res.ok) {
+      const saved = await res.json();
+      setFavorites((prev) => [...prev, saved]);
+    }
+  }
+
+  async function removeFavorite(userId) {
+    const res = await fetch(`/api/favorites/${userId}`, { method: "DELETE" });
+
+    if (res.ok) {
+      setFavorites((prev) => prev.filter((f) => f.id !== userId));
+    }
+  }
+
+  // === [TAMBAHAN BARU: Fungsi untuk mengubah/menambah note via PATCH] ===
+  async function updateNote(userId, noteText) {
+    const res = await fetch(`/api/favorites/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note: noteText }),
+    });
+
+    if (res.ok) {
+      const { data } = await res.json();
+      setFavorites((prev) =>
+        prev.map((item) => (item.id === userId ? { ...item, ...data } : item))
+      );
+    }
+  }
+  // =====================================================================
+
+  function isFavorite(userId) {
+    return favorites.some((f) => f.id === userId);
+  }
+
+  // === [TAMBAHAN BARU: Daftarkan updateNote ke dalam object value] ===
+  const value = {
+    favorites,
+    addFavorite,
+    removeFavorite,
+    updateNote,
+    isFavorite,
   };
+  // ===================================================================
 
   return (
-    <FavoriteContext.Provider value={{ favorites, toggleFavorite, isFavorite }}>
+    <FavoriteContext.Provider value={value}>
       {children}
     </FavoriteContext.Provider>
   );
 }
 
 export function useFavorite() {
-  return useContext(FavoriteContext);
+  const context = useContext(FavoriteContext);
+  if (context === undefined) {
+    throw new Error("useFavorite harus dipakai di dalam <FavoriteProvider>");
+  }
+  return context;
 }

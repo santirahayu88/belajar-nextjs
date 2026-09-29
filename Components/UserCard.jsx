@@ -1,7 +1,11 @@
 "use client";
 
+import { Heart } from "lucide-react";
+
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useFavorite } from "@/context/FavoriteContext";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 import {
   Card,
   CardContent,
@@ -10,7 +14,7 @@ import {
 } from "@/components/ui/card";
 
 export default function UserCard({ user }) {
-  const { toggleFavorite, isFavorite } = useFavorite();
+  const { isFavorite, addFavorite, removeFavorite } = useFavorite();
   const favorited = isFavorite(user.id);
 
   const initials = user.name
@@ -27,7 +31,7 @@ export default function UserCard({ user }) {
           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/40 to-primary/10 text-sm font-semibold">
             {initials}
           </div>
-          <CardTitle className="text-base font-medium">{user.name}</CardTitle>
+          <CardTitle>{user.name}</CardTitle>
         </div>
       </CardHeader>
 
@@ -35,24 +39,29 @@ export default function UserCard({ user }) {
         <p className="text-sm text-muted-foreground">{user.email}</p>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          {user.company?.name}
+          {user.company.name}
         </p>
 
-        {/* Gunakan grid-cols-2 atau flex-1 pada kedua tombol agar ukuran View Profile stabil */}
-        <div className="mt-4 flex items-center gap-2">
-          <Button 
-            variant="default" 
-            className="flex-1 rounded-full text-xs px-2"
+        <div className="mt-4 flex gap-2">
+          <a
+            href={`https://jsonplaceholder.typicode.com/users/${user.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(buttonVariants(), "flex-1 rounded-full")}
           >
             View Profile
-          </Button>
+          </a>
 
           <Button
-            onClick={() => toggleFavorite(user)}
             variant={favorited ? "default" : "outline"}
-            className="flex-1 rounded-full text-xs px-2"
+            className="rounded-full"
+            aria-pressed={favorited}
+            onClick={() =>
+              favorited ? removeFavorite(user.id) : addFavorite(user)
+            }
           >
-            {favorited ? "♥ Favorite" : "♡ Add Favorite"}
+            <Heart className={favorited ? "fill-red-300 text-red-500" : ""} />
+            {favorited ? "Favourite" : "Add Favourite"}
           </Button>
         </div>
       </CardContent>
