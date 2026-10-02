@@ -60,7 +60,7 @@ export default function UserCard({ user }) {
               favorited ? removeFavorite(user.id) : addFavorite(user)
             }
           >
-            <Heart className={favorited ? "fill-red-300 text-red-500" : ""} />
+            <Heart className={favorited ? "fill-black-300 text-pink-500" : ""} />
             {favorited ? "Favourite" : "Add Favourite"}
           </Button>
         </div>
